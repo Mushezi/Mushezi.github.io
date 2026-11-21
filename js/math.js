@@ -40,6 +40,15 @@
     })
   }
 
+  // 主题的 CSS 默认把 .katex 设为 display:none，等加 .katex-show 才显示。
+  // 这里渲染完统一补上这个类，不依赖自定义 CSS 是否被缓存。
+  function reveal() {
+    var nodes = document.querySelectorAll('#article-container .katex, .post-content .katex')
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].classList.add('katex-show')
+    }
+  }
+
   function init() {
     var containers = document.querySelectorAll('#article-container, .post-content')
     if (!containers.length) return
@@ -56,6 +65,10 @@
     addScript(KATEX_JS, function () {
       addScript(AUTO_RENDER_JS, function () {
         for (var i = 0; i < containers.length; i++) render(containers[i])
+        reveal()
+        // 主题脚本稍后可能再跑一次 showKatex，这里再兜一次
+        setTimeout(reveal, 300)
+        setTimeout(reveal, 1200)
       })
     })
   }
