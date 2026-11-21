@@ -18,4 +18,109 @@
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
   </entry>
+  <entry>
+    <title>P2827 [NOIP2016 提高组] 蚯蚓</title>
+    <url>/2026/11/21/p2827-earthworm/</url>
+    <content><![CDATA[<blockquote>
+<p>题目：<a href="https://www.luogu.com.cn/problem/P2827">洛谷 P2827 蚯蚓</a>（NOIP2016 提高组 Day2 T2）</p>
+</blockquote>
+<h2 id="题目大意"><a href="#题目大意" class="headerlink" title="题目大意"></a>题目大意</h2><p>有 $n$ 只蚯蚓，每只长度都是自然数。</p>
+<p>每一秒，神刀手取出<strong>当前最长</strong>的一只，按比例 $p$ 砍一刀：</p>
+<p>$$x \longrightarrow \left\lfloor px \right\rfloor,\quad x - \left\lfloor px \right\rfloor$$</p>
+<p>长度为 $0$ 的蚯蚓也会保留。除被切出来的两条蚯蚓外，<strong>其余所有蚯蚓在这一秒长度都增加 $q$</strong>。</p>
+<p>要求输出：</p>
+<ul>
+<li>$m$ 秒内，每一秒被切断的那只蚯蚓<strong>被切前的长度</strong>（共 $m$ 个数）；</li>
+<li>$m$ 秒后，所有蚯蚓的长度（共 $n+m$ 个数）。</li>
+<li>只需输出第 $t, 2t, 3t, \dots$ 个。</li>
+</ul>
+<p>数据范围：$n \le 5\times 10^{5}$，$m \le 7\times 10^{6}$，$q \le 200$，$0 &lt; u &lt; v \le 10^{9}$，$p &#x3D; u&#x2F;v$。</p>
+<span id="more"></span>
+
+<h2 id="先想暴力：堆"><a href="#先想暴力：堆" class="headerlink" title="先想暴力：堆"></a>先想暴力：堆</h2><p>每次取最大值、再插入两个新值，这是堆的典型场景，复杂度</p>
+<p>$$O\big((n+m)\log(n+m)\big)$$</p>
+<p>但 $m$ 高达 $7\times 10^{6}$，堆必然会 TLE。题目要的是 $O(n + m)$ 级别的线性做法。</p>
+<h2 id="关键：隐藏的单调性"><a href="#关键：隐藏的单调性" class="headerlink" title="关键：隐藏的单调性"></a>关键：隐藏的单调性</h2><p>一个看起来必须排序的过程，为什么能线性？观察这两个性质：</p>
+<ol>
+<li>每次切走的是<strong>最长</strong>的那只；</li>
+<li>每秒几乎所有蚯蚓都<strong>同时生长相同的长度</strong>。</li>
+</ol>
+<p>于是把所有蚯蚓分成三类，各自用队列维护：</p>
+<table>
+<thead>
+<tr>
+<th>队列</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$q_0$</td>
+<td>从没被切过的蚯蚓，开局排序后入队</td>
+</tr>
+<tr>
+<td>$q_1$</td>
+<td>被切成 $\lfloor px \rfloor$ 的那一份</td>
+</tr>
+<tr>
+<td>$q_2$</td>
+<td>被切成 $x - \lfloor px \rfloor$ 的那一份</td>
+</tr>
+</tbody></table>
+<p><strong>三个队列内部都是单调不增的</strong>。$q_0$ 排序后显然成立；$q_1$、$q_2$ 因为「原来长的被切完也长」而继承单调性（下面证明）。所以每秒的答案就是三个队首的最大值，取最大值是 $O(1)$ 的。</p>
+<h3 id="关于全体生长：偏移量"><a href="#关于全体生长：偏移量" class="headerlink" title="关于全体生长：偏移量"></a>关于全体生长：偏移量</h3><p>如果老老实实给每只蚯蚓都加 $q$，光是这一秒就退化成 $O(n)$。注意到<strong>所有蚯蚓加的是同一个数</strong>，所以整体加 $q$ 可以记成一个全局偏移量 $\text{qt}$：</p>
+<ul>
+<li>真实长度 &#x3D; 存储值 $+$ $\text{qt}$；</li>
+<li>被切出来的两条蚯蚓这一秒<strong>不生长</strong>，等价于把它们以新的 $\text{qt}$ 存入，存储值要再减去 $q$。</li>
+</ul>
+<p>这样全体生长就变成了 $O(1)$ 的偏移量修改，每次切蚯蚓只会产生 $O(1)$ 次单点修改。</p>
+<h2 id="单调性证明"><a href="#单调性证明" class="headerlink" title="单调性证明"></a>单调性证明</h2><p>设两只蚯蚓长度 $x \ge y$，被切后：</p>
+<p><strong>情况 2</strong>（$\lfloor px \rfloor$）：由 $x \ge y$ 得 $px \ge py$，两边取整仍有</p>
+<p>$$\left\lfloor px \right\rfloor \ge \left\lfloor py \right\rfloor$$</p>
+<p><strong>情况 3</strong>（$x - \lfloor px \rfloor$）：由 $x \ge y$ 得 $x - y \ge px - py$，移项得</p>
+<p>$$x - px \ge y - py$$</p>
+<p>两边同时取整：</p>
+<p>$$\left\lfloor x - px \right\rfloor \ge \left\lfloor y - py \right\rfloor$$</p>
+<p>又因为 $x, y$ 都是整数，可以直接把整数项提出取整号：</p>
+<p>$$x - \left\lfloor px \right\rfloor \ge y - \left\lfloor py \right\rfloor$$</p>
+<p>证毕。</p>
+<div class="note purple icon-padding flat"><i class="note-icon fas fa-lightbulb"></i><p><strong>证明取整不等式的套路</strong>：先不管取整，把式子变形成想要的样子，最后一步再两边同时取整；整数项还能从取整号里”美美隐身”地提出来。</p>
+</div>
+
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>三个队列 + 一个偏移量，注意 <code>Cut</code> 里那三步的<strong>顺序</strong>是本实现的关键。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">long</span> <span class="type">long</span> ll;</span><br><span class="line"></span><br><span class="line"><span class="comment">// n 最大 5e5，数组要开够（原来写 1e5+5 会 RE）</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N = <span class="number">5e5</span> + <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> n, m, q;</span><br><span class="line">ll u, v, t, qt;</span><br><span class="line"><span class="type">int</span> a[N];</span><br><span class="line"></span><br><span class="line"><span class="comment">// b[0]: 没被切过  b[1]: 被切成的 floor(px)  b[2]: 被切成的 x - floor(px)</span></span><br><span class="line">queue&lt;ll&gt; b[<span class="number">3</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 找出当前最长蚯蚓所在的队列</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Maxpos</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ll x = LLONG_MIN;</span><br><span class="line">    <span class="type">int</span> p = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (!b[<span class="number">0</span>].<span class="built_in">empty</span>() &amp;&amp; b[<span class="number">0</span>].<span class="built_in">front</span>() &gt; x) x = b[<span class="number">0</span>].<span class="built_in">front</span>(), p = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (!b[<span class="number">1</span>].<span class="built_in">empty</span>() &amp;&amp; b[<span class="number">1</span>].<span class="built_in">front</span>() &gt; x) x = b[<span class="number">1</span>].<span class="built_in">front</span>(), p = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (!b[<span class="number">2</span>].<span class="built_in">empty</span>() &amp;&amp; b[<span class="number">2</span>].<span class="built_in">front</span>() &gt; x) x = b[<span class="number">2</span>].<span class="built_in">front</span>(), p = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 切一刀，isput 表示这一秒要不要输出</span></span><br><span class="line"><span class="comment">// 顺序很关键：</span></span><br><span class="line"><span class="comment">//   1. 先按旧的偏移量取出真实长度并切分</span></span><br><span class="line"><span class="comment">//   2. 再更新偏移量（其它蚯蚓生长）</span></span><br><span class="line"><span class="comment">//   3. 最后让 x、y 减去新偏移量再入队</span></span><br><span class="line"><span class="comment">//      —— 这样它们等价于&quot;这一秒没有生长&quot;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Cut</span><span class="params">(<span class="type">bool</span> isput)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> p = <span class="built_in">Maxpos</span>();</span><br><span class="line">    ll cur = b[p].<span class="built_in">front</span>();</span><br><span class="line">    b[p].<span class="built_in">pop</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (isput) cout &lt;&lt; cur + qt &lt;&lt; <span class="string">&#x27; &#x27;</span>;</span><br><span class="line"></span><br><span class="line">    ll x = (cur + qt) * u / v;   <span class="comment">// floor(p * x)</span></span><br><span class="line">    ll y = cur + qt - x;</span><br><span class="line"></span><br><span class="line">    qt += q;                     <span class="comment">// 其余蚯蚓长大</span></span><br><span class="line">    x -= qt, y -= qt;</span><br><span class="line"></span><br><span class="line">    b[<span class="number">1</span>].<span class="built_in">emplace</span>(x);</span><br><span class="line">    b[<span class="number">2</span>].<span class="built_in">emplace</span>(y);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 取出一只，isput 表示要不要输出</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Read</span><span class="params">(<span class="type">bool</span> isput)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> p = <span class="built_in">Maxpos</span>();</span><br><span class="line">    <span class="keyword">if</span> (isput) cout &lt;&lt; (b[p].<span class="built_in">front</span>() + qt) &lt;&lt; <span class="string">&#x27; &#x27;</span>;</span><br><span class="line">    b[p].<span class="built_in">pop</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ios::<span class="built_in">sync_with_stdio</span>(<span class="number">0</span>);</span><br><span class="line">    cin.<span class="built_in">tie</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    cin &gt;&gt; n &gt;&gt; m &gt;&gt; q &gt;&gt; u &gt;&gt; v &gt;&gt; t;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) cin &gt;&gt; a[i];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始队列：从大到小</span></span><br><span class="line">    <span class="built_in">sort</span>(a, a + n, <span class="built_in">greater</span>&lt;<span class="type">int</span>&gt;());</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) b[<span class="number">0</span>].<span class="built_in">emplace</span>(a[i]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 前 m 秒：每秒切一只，第 t, 2t, ... 秒输出</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= m / t + <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="type">int</span> up = <span class="built_in">min</span>((i + <span class="number">1</span>) * t, (ll)(m + <span class="number">1</span>));</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = i * t + <span class="number">1</span>; j &lt; up; j++) <span class="built_in">Cut</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (up &lt;= m &amp;&amp; up == (i + <span class="number">1</span>) * t) <span class="built_in">Cut</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最后按从大到小输出全部 n + m 只</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= (m + n) / t + <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="type">int</span> up = <span class="built_in">min</span>((i + <span class="number">1</span>) * t, (ll)(m + n + <span class="number">1</span>));</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = i * t + <span class="number">1</span>; j &lt; up; j++) <span class="built_in">Read</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (up &lt;= m + n &amp;&amp; up == (i + <span class="number">1</span>) * t) <span class="built_in">Read</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="几个坑"><a href="#几个坑" class="headerlink" title="几个坑"></a>几个坑</h2><div class="note green icon-padding flat"><i class="note-icon fas fa-circle-check"></i><p>上面这份实现已用「优先队列暴力」随机对拍了 300 组小数据（$n, m \le 10$，含 $q &#x3D; 0$），输出完全一致。</p>
+</div>
+
+<div class="note red icon-padding flat"><i class="note-icon fas fa-triangle-exclamation"></i><p><strong>不要用 <code>long double</code> 算 $\lfloor px \rfloor$。</strong> 有人靠它 A 了，但样例都过不去——精度误差会让取整差 1，而本题只要差 1 就会连锁影响后面所有答案。老老实实用两个整数写分数：<code>(cur + qt) * u / v</code>，整数除法天然向下取整。</p>
+</div>
+
+<ul>
+<li><strong>偏移量更新顺序</strong>：先按旧 $qt$ 取出真实长度，再更新 $qt$，最后让两份减去新 $qt$ 入队。顺序反了，”被切的蚯蚓不再生长”这个效果就丢了。</li>
+<li><strong>数组大小</strong>：$n$ 是 $5\times 10^{5}$，<code>N</code> 开 <code>1e5+5</code> 会直接越界。</li>
+<li><strong><code>Maxpos</code> 里别忘了同步 <code>x</code></strong>：三个分支都要 <code>x = b[i].front()</code>，否则后面的比较会用旧的 <code>x</code>。</li>
+<li><strong>输出量很大</strong>：$m &#x3D; 7\times10^{6}$ 时务必 <code>ios::sync_with_stdio(0)</code>，否则光 I&#x2F;O 就超时。</li>
+</ul>
+<h2 id="复杂度"><a href="#复杂度" class="headerlink" title="复杂度"></a>复杂度</h2><ul>
+<li>时间：$O(n\log n + m)$，其中 $n\log n$ 来自初始排序，之后每只蚯蚓都只被取出、入队各常数次。</li>
+<li>空间：$O(n + m)$，三个队列最多存 $n + 2m$ 个元素。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ol>
+<li><strong>奇怪的函数先不管</strong>：取整这类函数可以先把不等式变形到位，最后两边同时取整；整数项还能提出来。</li>
+<li><strong>所有人都做同样的变化 → 用偏移量</strong>：把”全体 $+q$”变成”单点 $+q$”的等价操作，这是发现单调性的重要线索。</li>
+<li><strong>“每次取最大” + 数据范围逼你线性</strong>：看到这两个特征就该往单调性上想，而不是堆。</li>
+<li><strong>一秒内有多个操作时，留意顺序</strong>：本题必须<strong>先</strong>更新偏移量，才能达到”被切的蚯蚓这一秒不生长”的效果。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ACM</category>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>单调队列</tag>
+        <tag>贪心</tag>
+        <tag>偏移量</tag>
+        <tag>NOIP</tag>
+      </tags>
+  </entry>
 </search>

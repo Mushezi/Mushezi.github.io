@@ -995,3 +995,42 @@ html[data-theme="dark"] #page-header.not-top-img > #nav {
     scroll-behavior: auto !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   12. 数学公式（KaTeX，渲染逻辑见 source/js/math.js）
+   -------------------------------------------------------------------------- */
+/* 主题默认把 .katex 藏起来等 CSS 加载完再显示，这里是前端渲染，不需要藏 */
+.katex {
+  display: inline !important;
+  font-size: 1.02em;
+}
+
+/* 行间公式：过长时横向滚动，不撑破卡片 */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 1.1em 0;
+  padding: 4px 0 6px;
+  scrollbar-width: thin;
+}
+
+.katex-display > .katex {
+  display: block !important;
+  text-align: center;
+}
+
+/* 细一点的公式滚动条 */
+.katex-display::-webkit-scrollbar {
+  height: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--mz-primary-line);
+}
+
+/* 公式渲染失败时不要留白，直接把 TeX 源码显示出来 */
+.katex-error {
+  color: var(--mz-pink);
+  font-family: var(--mz-font-heading);
+}
